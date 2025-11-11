@@ -3,5 +3,15 @@
     "source.fixAll": "explicit",
     "source.organizeImports": "explicit",
     "source.sortMembers": "explicit"
-  }
+  },
+  "cSpell.words": [
+    "aquí",
+    "Confirmar",
+    "Contraseña",
+    "Crea",
+    "cuenta",
+    "Ingresa",
+    "Ingresar",
+    "tienes"
+  ]
 }
