@@ -16,6 +16,7 @@ async def create_user(user_data: dict):
 
     # Hashear contraseña antes de guardar
     user_data["password"] = hash_password(user_data["password"])
+    user_data.pop("_id", None)  
     new_user = await users_collection.insert_one(user_data)
     created = await users_collection.find_one({"_id": new_user.inserted_id})
     created["_id"] = str(created["_id"])

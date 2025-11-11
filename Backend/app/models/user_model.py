@@ -11,7 +11,7 @@ class TypeUser(str, Enum):
 
 
 class User(BaseModel):
-    id: Optional[str] = Field(default=None, alias="_id")
+    id: Optional[str] = Field(default=None, alias="_id") #ESTA CREANDO EL ID COMO NULL OTRA VEZ
     rut: str
     email: EmailStr
     password: str

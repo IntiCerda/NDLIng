@@ -13,6 +13,6 @@ async def create_report(report: Report):
 
 @router.get("/")
 async def get_all_reports():
-    reports = await report_service.get_reports()
+    reports = await report_service.get_all_reports()
     return reports
 
