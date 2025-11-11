@@ -1,2 +1,4 @@
 # NDLIng
-Negocios de la Ingenieria cosas
+
+
+Run: python -m uvicorn app.main:app --reload
