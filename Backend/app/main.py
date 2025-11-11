@@ -1,0 +1,1 @@
+# Usa python typings y tambien configura el vscode para que te haga un lint de los errores en "Analysis: Type Checking Mode" y ponlo strict
