@@ -12,6 +12,10 @@ export default function Home() {
         onPress={() => router.push("/(main)/profile")}
       />
       <Button
+        title="Make report"
+        onPress={() => router.push("/(main)/camera-screen")}
+      />
+      <Button
         title="Logout"
         onPress={() => router.replace("/(auth)/sign-in")}
       />
