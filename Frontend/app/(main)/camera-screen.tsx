@@ -7,6 +7,7 @@ import {
 import React, { useRef, useState } from "react";
 import { Button, Pressable, StyleSheet, Text, View } from "react-native";
 import { Image } from "expo-image";
+import { router } from "expo-router";
 
 export default function CameraScreen() {
   const [permission, requestPermission] = useCameraPermissions();
@@ -37,7 +38,15 @@ export default function CameraScreen() {
 
   const takePicture = async () => {
     const photo = await ref.current?.takePictureAsync();
-    if (photo?.uri) setUri(photo.uri);
+    if (photo?.uri) {
+      // Return photo to CreateReport
+      router.replace({
+        pathname: "/create-report",
+        params: {
+          photoUri: photo.uri
+        },
+      });
+    }
   };
 
   const recordVideo = async () => {
@@ -126,35 +135,119 @@ export default function CameraScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
+    backgroundColor: "#000",
     justifyContent: "center",
-  },
-  cameraContainer: StyleSheet.absoluteFillObject,
-  camera: StyleSheet.absoluteFillObject,
-  shutterContainer: {
-    position: "absolute",
-    bottom: 44,
-    left: 0,
-    width: "100%",
     alignItems: "center",
+  },
+
+  cameraContainer: {
+    flex: 1,
+    width: "100%",
+    backgroundColor: "#000",
+  },
+
+  camera: {
+    flex: 1,
+  },
+
+  topControls: {
+    position: "absolute",
+    top: 45,
+    width: "100%",
+    paddingHorizontal: 20,
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingHorizontal: 30,
-  },
-  shutterBtn: {
-    backgroundColor: "transparent",
-    borderWidth: 5,
-    borderColor: "white",
-    width: 85,
-    height: 85,
-    borderRadius: 45,
     alignItems: "center",
-    justifyContent: "center",
   },
+
+  topButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+
+  shutterContainer: {
+    position: "absolute",
+    bottom: 45,
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  shutterBtn: {
+    width: 90,
+    height: 90,
+    borderRadius: 50,
+    borderWidth: 5,
+    borderColor: "#fff",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.5,
+    shadowRadius: 10,
+  },
+
   shutterBtnInner: {
     width: 70,
     height: 70,
     borderRadius: 50,
+  },
+
+  modeSwitch: {
+    position: "absolute",
+    bottom: 150,
+    width: "100%",
+    alignItems: "center",
+  },
+
+  modeText: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#fff",
+    opacity: 0.9,
+    paddingVertical: 8,
+  },
+
+  flipButton: {
+    position: "absolute",
+    right: 20,
+    top: 45,
+    padding: 10,
+    backgroundColor: "rgba(0,0,0,0.4)",
+    borderRadius: 40,
+  },
+
+  flipButtonText: {
+    color: "#fff",
+    fontSize: 16,
+  },
+
+  reviewContainer: {
+    flex: 1,
+    backgroundColor: "#000",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+
+  reviewImage: {
+    width: "100%",
+    height: "80%",
+    resizeMode: "contain",
+    borderRadius: 12,
+  },
+
+  reviewButton: {
+    marginTop: 20,
+    padding: 14,
+    borderRadius: 10,
+    backgroundColor: "#fff",
+  },
+
+  reviewButtonText: {
+    color: "#000",
+    fontWeight: "600",
+    fontSize: 16,
   },
 });

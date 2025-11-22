@@ -1,32 +1,42 @@
-import React, { useState } from "react";
+import React, { useEffect } from "react";
 import { View, Text, TextInput, Button, Image, Alert, StyleSheet } from "react-native";
 import * as Location from "expo-location";
-import { useRouter } from "expo-router";
-
-interface Report {
-  title: string;
-  description: string;
-  severity: "Low" | "Medium" | "High";
-  photo: string;
-  location: {
-    latitude: number;
-    longitude: number;
-  };
-  datetime: string;
-}
-
+import { useRouter, useLocalSearchParams } from "expo-router";
+import { useReportStore } from "@/store/useReportStore";
+import { makeReport } from "@/utils/funcs";
+import { Report } from "@/types"
 
 export default function CreateReport() {
   const router = useRouter();
+  const params = useLocalSearchParams();
+  const { title, description, severity, photo, location, setField, setLocation } = useReportStore();
 
-  const [title, setTitle] = useState<string>("");
-  const [description, setDescription] = useState<string>("");
-  const [severity, setSeverity] = useState<"Low" | "Medium" | "High">("Medium");
-  const [photo, setPhoto] = useState<string | null>(null);
-  const [location, setLocation] = useState<Location.LocationObjectCoords | null>(null);
-  const [showCamera, setShowCamera] = useState<boolean>(false);
+  useEffect(() => {
+    if (params.photoUri) {
+      setField("photo", params.photoUri);
+    }
+  }, [params.photoUri]);
 
-  const handleSubmit = () => {
+
+  useEffect(() => {
+    (async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+
+      if (status !== "granted") {
+        Alert.alert(
+          "Permission needed",
+          "Location permission is required to include GPS coordinates."
+        );
+        return;
+      }
+      const pos = await Location.getCurrentPositionAsync({});
+      setLocation(pos.coords.latitude, pos.coords.longitude);
+    })();
+  }, []);
+
+
+
+  const handleSubmit = async () => {
     if (!title || !description || !photo || !location) {
       Alert.alert("Missing fields", "Please complete all fields and take a photo.");
       return;
@@ -38,46 +48,46 @@ export default function CreateReport() {
       severity,
       photo,
       location: {
-        latitude: location.latitude,
-        longitude: location.longitude,
+        latitude: location.latitude!,
+        longitude: location.longitude!,
       },
       datetime: new Date().toISOString(),
     };
 
-    console.log("Report created:", report);
-    Alert.alert("Success", "Report created successfully!");
-    router.back();
+    try {
+      await makeReport(report);
+
+      Alert.alert("Success", "Report created successfully!");
+      router.back();
+    } catch (err: any) {
+      Alert.alert("Error", err.message);
+    }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Create a Report</Text>
+      <Text style={styles.title}>Crear Reporte</Text>
 
       <Text style={styles.label}>Title</Text>
       <TextInput
         value={title}
-        onChangeText={setTitle}
-        style={styles.input}
-        placeholder="Enter title"
+        onChangeText={(v) => setField("title", v)}
       />
+
 
       <Text style={styles.label}>Description</Text>
       <TextInput
         value={description}
-        onChangeText={setDescription}
-        multiline
-        style={[styles.input, styles.textArea]}
-        placeholder="Describe the issue"
+        onChangeText={(v) => setField("description", v)}
       />
 
-      <Text style={styles.label}>Severity</Text>
+      <Text style={styles.label}>Severidad</Text>
       <View style={styles.severityContainer}>
-        {(["Low", "Medium", "High"] as const).map((level) => (
+        {(["Bajo", "Medio", "Alto"] as const).map((level) => (
           <Button
             key={level}
             title={level}
-            color={severity === level ? "tomato" : "gray"}
-            onPress={() => setSeverity(level)}
+            onPress={() => setField("severity", "Bajo")}
           />
         ))}
       </View>
@@ -85,7 +95,7 @@ export default function CreateReport() {
       {photo && <Image source={{ uri: photo }} style={styles.image} />}
 
       <View style={styles.buttonGroup}>
-        <Button title="Take Photo" onPress={() => setShowCamera(true)} />
+        <Button title="Take Photo" onPress={() => router.push("/camera-screen")} />
       </View>
 
       <View style={styles.buttonGroup}>
@@ -94,7 +104,7 @@ export default function CreateReport() {
 
       {location && (
         <Text style={styles.gpsText}>
-          GPS: {location.latitude.toFixed(4)}, {location.longitude.toFixed(4)}
+          GPS: {location.latitude!}, {location.longitude!}
         </Text>
       )}
     </View>
@@ -104,62 +114,78 @@ export default function CreateReport() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor: "#fff",
+    backgroundColor: "#F9FAFB",
+    paddingHorizontal: 20,
+    paddingTop: 20,
   },
+
   title: {
-    fontSize: 24,
-    fontWeight: "600",
-    marginBottom: 15,
+    fontSize: 26,
+    fontWeight: "700",
+    marginBottom: 20,
+    color: "#111827",
   },
+
   label: {
-    fontWeight: "500",
-    marginBottom: 5,
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#374151",
+    marginBottom: 6,
+    marginTop: 12,
   },
+
   input: {
     borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 12,
+    borderColor: "#D1D5DB",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 10,
+    padding: 12,
     fontSize: 16,
+    marginBottom: 8,
   },
+
   textArea: {
-    height: 100,
+    height: 120,
     textAlignVertical: "top",
   },
+
   severityContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginVertical: 10,
+    marginTop: 10,
+    marginBottom: 18,
   },
+
   image: {
     width: "100%",
-    height: 200,
-    borderRadius: 10,
-    marginVertical: 10,
+    height: 220,
+    borderRadius: 12,
+    marginVertical: 15,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
   },
+
   buttonGroup: {
+    marginVertical: 8,
+  },
+
+  gpsText: {
+    marginTop: 15,
+    fontSize: 13,
+    color: "#6B7280",
+    textAlign: "center",
+  },
+
+  buttonStyled: {
+    backgroundColor: "#2563EB",
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: "center",
     marginVertical: 5,
   },
-  gpsText: {
-    marginTop: 10,
-    fontSize: 12,
-    color: "gray",
-  },
-  infoText: {
-    flex: 1,
-    textAlign: "center",
-    textAlignVertical: "center",
+  buttonStyledText: {
+    color: "#FFFFFF",
+    fontWeight: "600",
     fontSize: 16,
-  },
-  camera: {
-    flex: 1,
-  },
-  cameraControls: {
-    flex: 1,
-    justifyContent: "flex-end",
-    alignItems: "center",
-    marginBottom: 30,
-  },
+  }
 });

@@ -1,7 +1,8 @@
 import { Link, useRouter } from "expo-router";
-import { View, Text, TextInput, Button, StyleSheet } from "react-native";
+import { View, Text, TextInput, Button, StyleSheet, Alert } from "react-native";
 import { useState } from "react";
 import { useAuthStore } from "@/store/authStore";
+import { signIn } from "@/utils/funcs";
 
 export default function SignIn() {
   const router = useRouter();
@@ -9,11 +10,31 @@ export default function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSignIn = () => {
-    // TODO: authenticate user
+  const handleSignIn = async (
+    email: string,
+    password: string
+  ): Promise<boolean> => {
+    
+    if (!email || !password) {
+      Alert.alert("Missing fields", "Please enter your email and password.");
+      return false;
+    }
 
-    setEmailStore(email)
-    router.replace("/");
+    try {
+      const token = await signIn(email, password);
+
+      console.log("User signed in:", email);
+      console.log("Token:", token);
+
+      setEmailStore(email);
+
+      router.replace("/");
+
+      return true;
+    } catch (error: any) {
+      Alert.alert("Sign In Failed", error.message);
+      return false;
+    }
   };
 
   return (
@@ -36,7 +57,7 @@ export default function SignIn() {
       />
 
       <View style={styles.button}>
-        <Button title="Ingresar" onPress={handleSignIn} />
+        <Button title="Ingresar" onPress={() => handleSignIn(email, password)} />
       </View>
 
       <Link href="/(auth)/sign-up" style={styles.link}>

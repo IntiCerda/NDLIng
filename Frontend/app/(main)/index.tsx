@@ -1,4 +1,4 @@
-import { View, Text, Button } from "react-native";
+import { View, Text, Button, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 
 export default function Home() {
@@ -13,12 +13,34 @@ export default function Home() {
       />
       <Button
         title="Make report"
-        onPress={() => router.push("/(main)/camera-screen")}
+        onPress={() => router.push("/(main)/create-report")}
       />
       <Button
         title="Logout"
+        color="red"
         onPress={() => router.replace("/(auth)/sign-in")}
       />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#F9FAFB",
+    paddingHorizontal: 20,
+    paddingTop: 40,
+  },
+
+  title: {
+    fontSize: 26,
+    fontWeight: "700",
+    color: "#111827",
+    marginBottom: 30,
+    textAlign: "center",
+  },
+
+  buttonGroup: {
+    marginVertical: 10,
+  },
+});

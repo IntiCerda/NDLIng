@@ -1,6 +1,7 @@
 import { View, Text, TextInput, Button, StyleSheet, Alert } from "react-native";
 import { Link, useRouter } from "expo-router";
 import { useState } from "react";
+import { signUp } from "@/utils/funcs";
 
 export default function SignUp() {
   const router = useRouter();
@@ -42,7 +43,12 @@ export default function SignUp() {
     setRut(cleanRut);
   };
 
-  const handleSignUp = (): boolean => {
+  const handleSignUp = async (
+    rut: string,
+    email: string,
+    password: string,
+    confirmPassword: string
+  ): Promise<boolean> => {
     if (!rut || !email || !password || !confirmPassword) {
       Alert.alert("Missing fields", "Please fill out all fields.");
       return false;
@@ -53,10 +59,21 @@ export default function SignUp() {
       return false;
     }
 
-    console.log("User registered:", email);
+    try {
+      const token = await signUp(email, password);
 
-    router.replace("/");
-    return true
+      console.log("User registered:", email);
+      console.log("Token:", token);
+
+      setEmailStore(email);
+
+      router.replace("/");
+
+      return true;
+    } catch (error: any) {
+      Alert.alert("Sign Up Failed", error.message);
+      return false;
+    }
   };
 
   return (
@@ -97,7 +114,7 @@ export default function SignUp() {
       />
 
       <View style={styles.button}>
-        <Button title="Sign Up" onPress={handleSignUp} />
+        <Button title="Sign Up" onPress={() => handleSignUp(rut, email, password, confirmPassword)} />
       </View>
 
       <Link href="/(auth)/sign-in" style={styles.link}>
@@ -137,3 +154,7 @@ const styles = StyleSheet.create({
     color: "#007bff",
   },
 });
+function setEmailStore(email: string) {
+  throw new Error("Function not implemented.");
+}
+
