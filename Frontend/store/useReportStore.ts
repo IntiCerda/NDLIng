@@ -3,7 +3,7 @@ import { create } from "zustand";
 interface ReportFormState {
   title: string;
   description: string;
-  severity: "Bajo" | "Medio" | "Alto";
+  severity: 1 | 2 | 3;
   photo: string | null;
   location: {
     latitude: number | null;
@@ -17,7 +17,7 @@ interface ReportFormState {
 export const useReportStore = create<ReportFormState>((set) => ({
   title: "",
   description: "",
-  severity: "Medio",
+  severity: 2,
   photo: null,
 
   location: {

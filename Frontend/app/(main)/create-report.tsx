@@ -5,11 +5,13 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { useReportStore } from "@/store/useReportStore";
 import { makeReport } from "@/utils/funcs";
 import { Report } from "@/types"
+import { useAuthStore } from "@/store/authStore";
 
 export default function CreateReport() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const { title, description, severity, photo, location, setField, setLocation } = useReportStore();
+  const { email } = useAuthStore()
 
   useEffect(() => {
     if (params.photoUri) {
@@ -29,8 +31,30 @@ export default function CreateReport() {
         );
         return;
       }
-      const pos = await Location.getCurrentPositionAsync({});
-      setLocation(pos.coords.latitude, pos.coords.longitude);
+
+      try {
+        // Try last known position first (often available instantly)
+        let pos = await Location.getLastKnownPositionAsync();
+
+        if (!pos) {
+          // If unavailable, get a fresh GPS reading
+          pos = await Location.getCurrentPositionAsync({
+            accuracy: Location.Accuracy.High,
+          });
+        }
+
+        if (!pos) {
+          throw new Error("No GPS fix available");
+        }
+
+        setLocation(pos.coords.latitude, pos.coords.longitude);
+      } catch (err) {
+        console.log("GPS Error:", err);
+        Alert.alert(
+          "GPS Error",
+          "Current location is unavailable. Enable GPS or try again."
+        );
+      }
     })();
   }, []);
 
@@ -46,12 +70,11 @@ export default function CreateReport() {
       title,
       description,
       severity,
-      photo,
-      location: {
-        latitude: location.latitude!,
-        longitude: location.longitude!,
-      },
-      datetime: new Date().toISOString(),
+      user: email,
+      category: "Some",
+      latitude: location.latitude,
+      longitude: location.longitude,
+      date: new Date().toISOString(),
     };
 
     try {
@@ -83,11 +106,11 @@ export default function CreateReport() {
 
       <Text style={styles.label}>Severidad</Text>
       <View style={styles.severityContainer}>
-        {(["Bajo", "Medio", "Alto"] as const).map((level) => (
+        {(["Bajo", "Medio", "Alto"] as const).map((level, index) => (
           <Button
             key={level}
             title={level}
-            onPress={() => setField("severity", "Bajo")}
+            onPress={() => setField("severity", index)}
           />
         ))}
       </View>

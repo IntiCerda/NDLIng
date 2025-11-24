@@ -1,30 +1,33 @@
 import axios from "axios";
 import { Report } from "@/types"
 
-const API_URL = "https://your-backend.com";
+const API_URL = "http://192.168.1.85:8000";
 
-export async function signUp(email: string, password: string): Promise<string> {
+export async function signUp(rut: string, email: string, password: string): Promise<boolean> {
   try {
-    const response = await axios.post(`${API_URL}/auth/signup`, {
+    console.log(rut, email, password)
+    const response = await axios.post(`${API_URL}/users`, {
+      rut,
       email,
       password,
     });
-
-    return response.data.token;
+    console.log("status:", response.status)
+    return response.status === 200 || response.status === 201;
   } catch (error: any) {
-    console.error("SignUp error:", error.response?.data || error);
+    console.error("SignUp error:", error.response?.data || error, error.response?.data?.message);
+    console.log(error)
     throw new Error(error.response?.data?.message || "Sign up failed");
   }
 }
 
-export async function signIn(email: string, password: string): Promise<string> {
+export async function signIn(email: string, password: string): Promise<boolean> {
   try {
-    const response = await axios.post(`${API_URL}/auth/signin`, {
+    const response = await axios.post(`${API_URL}/auth/auth/login`, {
       email,
       password,
     });
 
-    return response.data.token;
+    return response.status === 200 || response.status === 201;
   } catch (error: any) {
     console.error("SignIn error:", error.response?.data || error);
     throw new Error(error.response?.data?.message || "Sign in failed");

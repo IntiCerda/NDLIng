@@ -2,6 +2,7 @@ import { View, Text, TextInput, Button, StyleSheet, Alert } from "react-native";
 import { Link, useRouter } from "expo-router";
 import { useState } from "react";
 import { signUp } from "@/utils/funcs";
+import { useAuthStore } from "@/store/authStore";
 
 export default function SignUp() {
   const router = useRouter();
@@ -9,6 +10,7 @@ export default function SignUp() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const { setEmailStore } = useAuthStore()
 
   const formatRut = (value: string): string => {
 
@@ -60,18 +62,19 @@ export default function SignUp() {
     }
 
     try {
-      const token = await signUp(email, password);
+      const token = await signUp(rut, email, password);
 
       console.log("User registered:", email);
       console.log("Token:", token);
 
       setEmailStore(email);
-
-      router.replace("/");
-
+      console.log("antes router")
+      router.replace("/(auth)/sign-in");
+      console.log("despues router")
       return true;
     } catch (error: any) {
       Alert.alert("Sign Up Failed", error.message);
+      console.log(error)
       return false;
     }
   };

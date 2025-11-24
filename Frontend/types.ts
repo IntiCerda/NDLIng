@@ -1,11 +1,10 @@
 export interface Report {
   title: string;
   description: string;
-  severity: "Bajo" | "Medio" | "Alto";
-  photo: string;
-  location: {
-    latitude: number;
-    longitude: number;
-  };
-  datetime: string;
+  user: string,
+  category: string
+  severity: 1 | 2 | 3;
+  latitude: number;
+  longitude: number;
+  date: string;
 }
